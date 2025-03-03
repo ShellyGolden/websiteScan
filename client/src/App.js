@@ -19,13 +19,17 @@ function App() {
 
         try {
             const response = await axios.get(`http://127.0.0.1:8000/api/scan?domain=${domain}`);
-            console.log('api response: ', response)
-            console.log('data: ', response.data)
             setData(response.data);
         }
         catch (error) {
-            console.error("Error fetching data from API:", error)
             setError("Failed to scan the domain. Please try again.");
+
+            if (error.response) {
+            setError(error.response.data.detail || "Failed to scan the domain. Please try again.");
+            }
+            else {
+            setError("Failed to connect to the server.");
+            }
         }
 
         setLoading(false);

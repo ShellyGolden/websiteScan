@@ -2,6 +2,7 @@ from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 import subprocess
 import json
+import shutil
 
 app = FastAPI()
 
@@ -30,24 +31,38 @@ async def scan_website(domain: str):
     return structured_response
 
 
-#Executes the HTTPX command to scan the given domain and returns the raw output.
-# A timeout of 300 seconds is set to prevent hanging in case of an unresponsive domain.
+# Executes the HTTPX command to scan the given domain and returns the raw output.
 def execute_httpx_scan(domain: str) -> str:
+    #Check if HTTPX is installed before executing the command
+    if not shutil.which("httpx"):
+        raise HTTPException(status_code=500, detail="httpx is not installed or not found in PATH")
+
     try:
+        #Runs HTTPX with a 300-second timeout to avoid indefinite hanging
         result = subprocess.run(
-            ["httpx", "-json", "-title", "-status-code", "-tech-detect", "-web-server", "-ip", "-cname","-timeout", "300", "-u", domain],
+            ["httpx", "-json", "-title", "-status-code", "-tech-detect", "-web-server", "-ip", "-cname", "-timeout", "300", "-u", domain],
             capture_output=True,
             text=True
         )
 
         if result.returncode != 0:
-            raise HTTPException(status_code=500, detail=f"Scanning failed: {result.stderr}")
+            raise HTTPException(status_code=500, detail=f"Scanning failed: {result.stderr.strip()}")
 
-        return result.stdout.strip()
+        # Ensure the output is not empty before returning
+        output = result.stdout.strip()
+        if not output:
+            raise HTTPException(status_code=500, detail="HTTPX returned empty output")
+
+        return output
+
     except subprocess.TimeoutExpired:
+        # Handle case where HTTPX scan takes longer than 300 seconds
         raise HTTPException(status_code=500, detail="HTTPX scan timed out")
+
     except Exception as e:
+        # Catch any unexpected errors and return them
         raise HTTPException(status_code=500, detail=str(e))
+
 
 #Parses the JSON output from HTTPX and returns a list of dictionaries.
 def parse_httpx_output(output: str):
