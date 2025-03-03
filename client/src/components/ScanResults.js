@@ -5,11 +5,12 @@ function ScanResults({ data, error }) {
         return <p style={{ color: "red" }}>{error}</p>;
     }
 
+    // If there is no scan data available, show a message
     if (!data) {
         return <p>No scan data available.</p>;
     }
 
-    console.log("📊 Displaying Scan Data:", data); // לוודא שהנתונים מגיעים לכאן
+    console.log("Displaying Scan Data:", data);
 
     return (
         <div style={{

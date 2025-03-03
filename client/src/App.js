@@ -4,11 +4,13 @@ import ScanForm from "./components/ScanForm";
 import ScanResults from "./components/ScanResults";
 
 function App() {
+    // State variables for managing API response, loading state, and errors
     const [data, setData] = useState(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
 
     const handleScan = async (domain) => {
+        // Reset previous data and set loading state
         setLoading(true);
         setError(null);
         setData(null);
@@ -20,8 +22,9 @@ function App() {
             console.log('api response: ', response)
             console.log('data: ', response.data)
             setData(response.data);
-        } catch (err) {
-            console.error('error fetching')
+        }
+        catch (error) {
+            console.error("Error fetching data from API:", error)
             setError("Failed to scan the domain. Please try again.");
         }
 

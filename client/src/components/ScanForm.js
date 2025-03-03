@@ -1,11 +1,12 @@
 import React, { useState } from "react";
 
 function ScanForm({ onScan }) {
+    // State to manage the domain input
     const [domain, setDomain] = useState("");
 
     const handleSubmit = (e) => {
-        e.preventDefault();
-        if (domain.trim()) {
+        e.preventDefault(); // Prevents the page from refreshing on submit
+        if (domain.trim()) { // Ensures that the input is not empty
             onScan(domain);
         }
     };
